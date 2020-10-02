@@ -37,6 +37,7 @@ namespace Microsoft.PowerApps.TestAutomation.Tests
         [ClassInitialize]
         public static void Initialize(TestContext TestContext)
         {
+            
             _testContext = TestContext;
 
             _username = _testContext.Properties["OnlineUsername"].ToString();
@@ -49,6 +50,7 @@ namespace Microsoft.PowerApps.TestAutomation.Tests
             _usePrivateMode = _testContext.Properties["UsePrivateMode"].ToString();
             _testAutomationURLFilePath = _testContext.Properties["TestAutomationURLFilePath"].ToString();
             _testMaxWaitTimeInSeconds = Convert.ToInt16(_testContext.Properties["TestMaxWaitTimeInSeconds"]);
+             Console.WriteLine("***************"+_testAutomationURLFilePath );
         }
 
         [TestCategory("PowerAppsTestAutomation")]
@@ -59,7 +61,7 @@ namespace Microsoft.PowerApps.TestAutomation.Tests
             BrowserOptions options = RunTestSettings.Options;
             options.BrowserType = _browserType;
             options.DriversPath = _driversPath;
-
+            Console.WriteLine("********2*******"+_testAutomationURLFilePath );
             using (var appBrowser = new PowerAppBrowser(options))
             {
                 // Track current test iteration
