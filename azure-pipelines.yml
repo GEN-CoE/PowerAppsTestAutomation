@@ -1,19 +1,52 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- main
-
-pool:
-  vmImage: 'ubuntu-latest'
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+# Variable 'BrowserTypeChrome' was defined in the Variables tab
+# Variable 'BrowserTypeFirefox' was defined in the Variables tab
+# Variable 'OnlinePassword' was defined in the Variables tab
+# Variable 'OnlineUrl' was defined in the Variables tab
+# Variable 'OnlineUsername' was defined in the Variables tab
+# Variable 'TestAutomationURLFilePath' was defined in the Variables tab
+# Variable 'UsePrivateMode' was defined in the Variables tab
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: master
+jobs:
+- job: Job_1
+  displayName: Agent job 1
+  timeoutInMinutes: 90
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Establecer resolución de pantalla del agente en 1920 x 1080
+    inputs:
+      targetType: inline
+      script: "# Set agent screen resolution to 1920x1080 to avoid sizing issues with Portal  \nSet-DisplayResolution -Width 1920 -Height 1080 -Force\n# Wait 10 seconds  \nStart-Sleep -s 10\n# Verify Screen Resolution is set to 1920x1080  \nGet-DisplayResolution"
+  - task: NuGetCommand@2
+    displayName: Restaurar paquetes de NuGet
+    inputs:
+      solution: PowerAppsTestAutomation.sln
+  - task: VSBuild@1
+    displayName: Compilar solución de automatización de prueba de Power Apps
+    inputs:
+      solution: PowerAppsTestAutomation.sln
+  - task: VSTest@2
+    displayName: Compilar pruebas de automatización de prueba de Power Apps a través de $ (BrowserTypeChrome)
+    inputs:
+      testAssemblyVer2: '**\Microsoft.PowerApps.TestAutomation.Tests\bin\\Debug\Microsoft.PowerApps.TestAutomation.Tests.dll'
+      testFiltercriteria: TestCategory=PowerAppsTestAutomation
+      uiTests: true
+      runSettingsFile: Microsoft.PowerApps.TestAutomation.Tests/patestautomation.runsettings
+      overrideTestrunParameters: -OnlineUsername $(OnlineUsername) -OnlinePassword $(OnlinePassword) -BrowserType $(BrowserTypeChrome) -OnlineUrl $(OnlineUrl) -UsePrivateMode $(UsePrivateMode) -TestAutomationURLFilePath $(TestAutomationURLFilePath) -DriversPath $(ChromeWebDriver)
+      testRunTitle: Ejecutar pruebas de automatización de prueba de Power Apps a través de $(BrowserTypeChrome)
+  - task: VSTest@2
+    displayName: Ejecutar pruebas de automatización de prueba de Power Apps a través de $(BrowserTypeFirefox)
+    inputs:
+      testAssemblyVer2: '**\Microsoft.PowerApps.TestAutomation.Tests\bin\\Debug\Microsoft.PowerApps.TestAutomation.Tests.dll'
+      testFiltercriteria: TestCategory=PowerAppsTestAutomation
+      uiTests: true
+      runSettingsFile: Microsoft.PowerApps.TestAutomation.Tests/patestautomation.runsettings
+      overrideTestrunParameters: -OnlineUsername $(OnlineUsername) -OnlinePassword $(OnlinePassword) -BrowserType $(BrowserTypeFirefox) -OnlineUrl $(OnlineUrl) -UsePrivateMode $(UsePrivateMode) -TestAutomationURLFilePath $(TestAutomationURLFilePath) -DriversPath $(GeckoWebDriver)
+      testRunTitle: Ejecutar pruebas de automatización de prueba de Power Apps a través de $(BrowserTypeFirefox)
+...
